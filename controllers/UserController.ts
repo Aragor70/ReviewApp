@@ -13,7 +13,7 @@ class UserController {
   /**
    * Create new user method, returns object with success message
    * authentication status true on user creation
-   * the token generated
+   * and the token generated
    *
    * @param req
    * @param res
@@ -28,11 +28,12 @@ class UserController {
       });
     }
     try {
-      await User.create(req.body);
+      const newUser = await User.create(req.body);
+      console.log("this is the response", newUser);
       res.status(201).json({
         message: "User Created",
         auth: true,
-        token: "token",
+        token: newUser.token,
       });
     } catch (error) {
       res.status(400).send(error);
