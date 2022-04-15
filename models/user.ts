@@ -68,7 +68,7 @@ const User = dbSequelise.define(
     date_of_birth: { type: DataTypes.DATE, validate: { isDate: true } },
     created_at: { type: DataTypes.DATE, validate: { isDate: true } },
     last_login: { type: DataTypes.DATE, validate: { isDate: true } },
-    avatar: { type: DataTypes.BLOB("long"), defaultValue: "" },
+    avatar: { type: DataTypes.STRING(255), defaultValue: "" },
     token: { type: DataTypes.STRING(255) },
     public_key: { type: DataTypes.STRING(255) },
     private_key: { type: DataTypes.STRING(255) },

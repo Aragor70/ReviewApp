@@ -2,7 +2,7 @@ import express, { Request, Response, Router, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 //custom imports
-import User from "../models/user";
+import User from "../models/User";
 import asyncHandler from "../middlewares/async";
 import ErrorResponse from "../utils/ErrorResponse";
 //types
@@ -24,14 +24,16 @@ class UserController {
     //check if password matches the confirmation password 2 form inputs
     if (req.body.password !== req.body.confPassword) {
       return res.status(400).send({
-        message: "password provided does not match the confirmation password",
+        message: "Password provided does not match the confirmation password.",
       });
     }
     try {
+
+      // INSERT INTO accounts (name, email, password, avatar, public_key, private_key, account_type) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *
       await User.create(req.body);
       res.status(201).json({
         message: "User Created",
-        auth: true,
+        success: true,
         token: "token",
       });
     } catch (error) {
