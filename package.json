@@ -4,7 +4,6 @@
   "description": "NiVest app",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --project ./",
     "dev": "concurrently \"npm run server\"",
     "start": "node server.js",
@@ -29,9 +28,11 @@
     "gravatar": "^1.8.2",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.2",
-    "pg": "^8.7.1"
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4"
   },
   "devDependencies": {
+    "sequelize": "^6.19.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/crypto-js": "^4.0.2",
     "@types/elliptic": "^6.4.13",
