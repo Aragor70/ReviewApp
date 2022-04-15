@@ -2,7 +2,7 @@ import express, { Request, Response, Router, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 //custom imports
-import User from "../models/user";
+import User from "../models/User";
 import asyncHandler from "../middlewares/async";
 import ErrorResponse from "../utils/ErrorResponse";
 //types
@@ -11,7 +11,7 @@ const ecGenerate = new ec("secp256k1");
 
 class UserController {
   /**
-   * Create new user method, returns object with success message
+   * Create new user controller method, returns object with success message
    * authentication status true on user creation
    * and the token generated
    *
@@ -24,16 +24,16 @@ class UserController {
     //check if password matches the confirmation password 2 form inputs
     if (req.body.password !== req.body.confPassword) {
       return res.status(400).send({
-        message: "password provided does not match the confirmation password",
+        message: "Password provided does not match the confirmation password.",
       });
     }
     try {
-      const newUser = await User.create(req.body);
-      console.log("this is the response", newUser);
+      // INSERT INTO accounts (name, email, password, avatar, public_key, private_key, account_type) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *
+      const createdUser = await User.create(req.body);
       res.status(201).json({
         message: "User Created",
-        auth: true,
-        token: newUser.token,
+        success: true,
+        token: createdUser.token,
       });
     } catch (error) {
       res.status(400).send(error);
