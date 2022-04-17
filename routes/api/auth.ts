@@ -38,11 +38,6 @@ router.post('/pre-register', authController.preRegister)
 router.put('/', authController.update);
 
 
-//route get    api/auth
-//description  update email recovery
-//access       private
-router.put('/email_recovery', authController.updateEmail);
-
 
 
 

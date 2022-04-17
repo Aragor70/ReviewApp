@@ -9,7 +9,7 @@ const userController = new UserController();
 //route get    api/users
 //description  get users
 //access       private
-// router.get("/", userController.getUsers);
+ router.get("/", userController.getUsers);
 
 //route get    api/users
 //description  register

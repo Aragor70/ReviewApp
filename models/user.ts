@@ -113,11 +113,6 @@ const User = dbSequelise.define(
           user.public_key = publicKey; //key assingment
           user.private_key = privateKey; //key assingment
 
-          //username generator
-          //todo this in not active, why re-assign the name if it was provided?
-          const userName =
-            user.name || user.email.slice(0, user.email.indexOf("@"));
-
           //avatar handling, probably export this to re-use it
           let avatar = gravatar.url(user.email, {
             s: "200",
@@ -125,6 +120,7 @@ const User = dbSequelise.define(
             d: "mm",
           });
 
+          
           if (
             avatar &&
             avatar.toString() &&
@@ -138,8 +134,11 @@ const User = dbSequelise.define(
         }
       },
       beforeSave: async (user) => {
+
+        // UPDATE accounts SET token = $1 WHERE email = $2
+
         user.token = await user.createToken(user["user_id"], {
-          name: "george in secret",
+          name: "Review_Secret_Key",
         });
       },
       // after user is saved to db password is protected

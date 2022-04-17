@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import ErrorResponse from "../utils/ErrorResponse";
 import asyncHandler from "../middlewares/async";
 import { pool } from "../config/db";
+import User from "../models/User";
 
 class AuthController {
   getUser = asyncHandler(async (req: any, res: any, next: any) => {
@@ -18,12 +19,9 @@ class AuthController {
       req.headers.authorization.indexOf("Bearer") + 7
     );
 
-    const { rows } = await pool.query(
-      `SELECT * FROM accounts WHERE token = $1`,
-      [token]
-    );
+    // SELECT * FROM accounts WHERE token = $1
 
-    const user = (await rows[0]) || false;
+    const user = await User.findOne({ where: { token } }) || false;
 
     res.json(user);
   });
@@ -32,18 +30,15 @@ class AuthController {
     async (req: Request, res: Response, next: NextFunction) => {
       const { email, password } = req.body;
 
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE email = $1`,
-        [email]
-      );
+      // SELECT * FROM accounts WHERE email = $1
 
-      const user = (await rows[0]) || false;
+      const user = await User.findOne({ where: { email } }) || false;
 
       if (!user) {
         return next(new ErrorResponse("Invalid Credentials.", 422));
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(await password, user.password);
 
       if (!isMatch) {
         return next(new ErrorResponse("Invalid Credentials.", 422));
@@ -55,27 +50,28 @@ class AuthController {
         },
       };
 
-      await pool.query(
-        `UPDATE accounts SET last_login = now() WHERE email = $1`,
-        [email]
-      );
+      // UPDATE accounts SET last_login = now() WHERE email = $1
+
+      user.last_login = new Date();
+      
 
       const JWTSecretKey: any = process.env["jwtSecret"];
       return jwt.sign(
         payload,
         JWTSecretKey,
         { expiresIn: 360000 },
-        async (err, token) => {
+        async (err) => {
           if (err) {
             return next(new ErrorResponse(err.message, 422));
           }
+          
 
-          await pool.query(`UPDATE accounts SET token = $1 WHERE email = $2`, [
-            token,
-            email,
-          ]);
+          await user.save();
 
-          res.json({ success: true, token });
+          // after save, in model
+          // UPDATE accounts SET token = $1 WHERE email = $2
+
+          res.json({ success: true, token: user.token });
         }
       );
     }
@@ -85,12 +81,9 @@ class AuthController {
     async (req: Request, res: Response, next: NextFunction) => {
       const { email } = req.body;
 
-      const { rows } = await pool.query(
-        `SELECT email FROM accounts WHERE email = $1`,
-        [email]
-      );
+      // SELECT email FROM accounts WHERE email = $1
 
-      const user = (await rows[0]) || false;
+      const user = await User.findOne({ where: { email } }) || false;
 
       if (!user) {
         return next(new ErrorResponse("Invalid Credentials.", 422));
@@ -104,12 +97,9 @@ class AuthController {
     async (req: Request, res: Response, next: NextFunction) => {
       const { email } = req.body;
 
-      const { rows } = await pool.query(
-        `SELECT email FROM accounts WHERE email = $1`,
-        [email]
-      );
+      // SELECT email FROM accounts WHERE email = $1
 
-      const user = (await rows[0]) || false;
+      const user = await User.findOne({ where: { email } }) || false;
 
       if (user) {
         return next(new ErrorResponse("Account already exists.", 422));
@@ -146,180 +136,38 @@ class AuthController {
         req.headers.authorization.indexOf("Bearer") + 7
       );
 
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE token = $1`,
-        [token]
-      );
 
-      const user = (await rows[0]) || false;
+      // SELECT * FROM accounts WHERE token = $1
+
+      const user = await User.findOne({ where: { token } }) || false;
 
       if (!user) {
         return next(new ErrorResponse("Go to log on.", 422));
       }
+      
 
-      if (email && email === user?.email) {
-        const users = await pool.query(
-          `UPDATE accounts SET first_name = $1, last_name = $2, gender_title = $3, date_of_birth = $4, country = $5 WHERE email = $6 RETURNING *`,
-          [
-            first_name,
-            last_name,
-            gender_title,
-            date_of_birth,
-            country,
-            user?.email,
-          ]
-        );
+        // UPDATE accounts SET first_name = $1, last_name = $2, gender_title = $3, date_of_birth = $4, country = $5 WHERE email = $6 RETURNING *
 
-        return res.json({ success: true, user: users?.rows[0] });
-      } else {
-        const users = await pool.query(
-          `UPDATE accounts SET avatar = $1 WHERE email = $2  RETURNING *`,
-          [avatar, user?.email]
-        );
+        user.first_name = first_name;
+        user.last_name = last_name;
+        user.gender_title = gender_title;
+        user.date_of_birth = date_of_birth;
+        user.country = country;
 
-        return res.json({ success: true, user: users?.rows[0] });
-      }
+        if (email !== user?.email) {
+
+          user.email = email;
+          user.approved = false;
+
+        }
+        await user.save();
+        
+
+        return res.json({ success: true, user });
+
     }
   );
 
-  setMainWallet = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      if (
-        !req.headers.authorization ||
-        !req.headers.authorization.includes("Bearer")
-      ) {
-        return next(new ErrorResponse("Go to log on.", 422));
-      }
-
-      const { main_wallet } = req.body;
-
-      if (!main_wallet) {
-        return next(new ErrorResponse("Currency is required.", 422));
-      }
-
-      const token = req.headers.authorization.slice(
-        req.headers.authorization.indexOf("Bearer") + 7
-      );
-
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE token = $1`,
-        [token]
-      );
-
-      const user = (await rows[0]) || false;
-
-      if (!user) {
-        return next(new ErrorResponse("Go to log on.", 422));
-      }
-
-      const updates: any = await pool.query(
-        `UPDATE accounts SET main_wallet = $1 WHERE email = $2 RETURNING *`,
-        [main_wallet, user.email]
-      );
-
-      res.json({ success: true, user: updates?.rows[0] || {} });
-    }
-  );
-
-  createWallet = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      if (
-        !req.headers.authorization ||
-        !req.headers.authorization.includes("Bearer")
-      ) {
-        return next(new ErrorResponse("Go to log on.", 422));
-      }
-
-      const { wallet } = req.body;
-
-      if (!wallet) {
-        return next(new ErrorResponse("Currency is required.", 422));
-      }
-
-      const token = req.headers.authorization.slice(
-        req.headers.authorization.indexOf("Bearer") + 7
-      );
-
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE token = $1`,
-        [token]
-      );
-
-      const user = (await rows[0]) || false;
-
-      if (!user) {
-        return next(new ErrorResponse("Go to log on.", 422));
-      }
-
-      const updates: any = await pool.query(
-        `UPDATE accounts SET wallets = array_append(wallets, $1) WHERE email = $2 RETURNING *`,
-        [wallet, user.email]
-      );
-
-      res.json({ success: true, user: updates?.rows[0] || {} });
-    }
-  );
-
-  verifySecret = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      const { secret, password } = req.body;
-
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE private_key = $1 `,
-        [secret]
-      );
-
-      const user = (await rows[0]) || false;
-
-      if (!user) {
-        return next(new ErrorResponse("Invalid Credentials.", 422));
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        return next(new ErrorResponse("Invalid Credentials.", 422));
-      }
-
-      res.json({ success: true });
-    }
-  );
-
-  updateEmail = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-      const { secret, password, email, emailConfirmation } = req.body;
-
-      if (email !== emailConfirmation) {
-        return next(new ErrorResponse("These emails are not equal.", 422));
-      }
-
-      const { rows } = await pool.query(
-        `SELECT * FROM accounts WHERE private_key = $1 `,
-        [secret]
-      );
-
-      const user = (await rows[0]) || false;
-
-      if (!user) {
-        return next(new ErrorResponse("Invalid Credentials.", 422));
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        return next(new ErrorResponse("Invalid Credentials.", 422));
-      }
-
-      const users: any = await pool.query(
-        `UPDATE accounts SET email = $1 WHERE email = $3 RETURNING *`,
-        [email, false, user.email]
-      );
-
-      user.email = await email;
-
-      res.json({ success: true, user: users?.rows[0] });
-    }
-  );
 }
 
 export default AuthController;
