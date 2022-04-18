@@ -32,7 +32,7 @@ Rename "config/config.env.example" to "config/config.env" and "config/postgres.e
 ### Withought Docker:
 
 ```
-npm install
+npm install && npm install -g ts-node
 ```
 
 Run App in development environment
