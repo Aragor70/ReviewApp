@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import ErrorResponse from "../utils/ErrorResponse";
 import asyncHandler from "../middlewares/async";
-import { pool } from "../config/db";
+// import { pool } from "../database/db";
 import User from "../models/User";
 
 class AuthController {
@@ -21,7 +21,7 @@ class AuthController {
 
     // SELECT * FROM accounts WHERE token = $1
 
-    const user = await User.findOne({ where: { token } }) || false;
+    const user = (await User.findOne({ where: { token } })) || false;
 
     res.json(user);
   });
@@ -32,7 +32,7 @@ class AuthController {
 
       // SELECT * FROM accounts WHERE email = $1
 
-      const user = await User.findOne({ where: { email } }) || false;
+      const user = (await User.findOne({ where: { email } })) || false;
 
       if (!user) {
         return next(new ErrorResponse("Invalid Credentials.", 422));
@@ -53,7 +53,6 @@ class AuthController {
       // UPDATE accounts SET last_login = now() WHERE email = $1
 
       user.last_login = new Date();
-      
 
       const JWTSecretKey: any = process.env["jwtSecret"];
       return jwt.sign(
@@ -64,7 +63,6 @@ class AuthController {
           if (err) {
             return next(new ErrorResponse(err.message, 422));
           }
-          
 
           await user.save();
 
@@ -83,7 +81,7 @@ class AuthController {
 
       // SELECT email FROM accounts WHERE email = $1
 
-      const user = await User.findOne({ where: { email } }) || false;
+      const user = (await User.findOne({ where: { email } })) || false;
 
       if (!user) {
         return next(new ErrorResponse("Invalid Credentials.", 422));
@@ -99,7 +97,7 @@ class AuthController {
 
       // SELECT email FROM accounts WHERE email = $1
 
-      const user = await User.findOne({ where: { email } }) || false;
+      const user = (await User.findOne({ where: { email } })) || false;
 
       if (user) {
         return next(new ErrorResponse("Account already exists.", 422));
@@ -136,38 +134,31 @@ class AuthController {
         req.headers.authorization.indexOf("Bearer") + 7
       );
 
-
       // SELECT * FROM accounts WHERE token = $1
 
-      const user = await User.findOne({ where: { token } }) || false;
+      const user = (await User.findOne({ where: { token } })) || false;
 
       if (!user) {
         return next(new ErrorResponse("Go to log on.", 422));
       }
-      
 
-        // UPDATE accounts SET first_name = $1, last_name = $2, gender_title = $3, date_of_birth = $4, country = $5 WHERE email = $6 RETURNING *
+      // UPDATE accounts SET first_name = $1, last_name = $2, gender_title = $3, date_of_birth = $4, country = $5 WHERE email = $6 RETURNING *
 
-        user.first_name = first_name;
-        user.last_name = last_name;
-        user.gender_title = gender_title;
-        user.date_of_birth = date_of_birth;
-        user.country = country;
+      user.first_name = first_name;
+      user.last_name = last_name;
+      user.gender_title = gender_title;
+      user.date_of_birth = date_of_birth;
+      user.country = country;
 
-        if (email !== user?.email) {
+      if (email !== user?.email) {
+        user.email = email;
+        user.approved = false;
+      }
+      await user.save();
 
-          user.email = email;
-          user.approved = false;
-
-        }
-        await user.save();
-        
-
-        return res.json({ success: true, user });
-
+      return res.json({ success: true, user });
     }
   );
-
 }
 
 export default AuthController;

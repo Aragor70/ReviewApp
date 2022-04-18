@@ -2,12 +2,12 @@
   "name": "server",
   "version": "1.0.0",
   "description": "NiVest app",
-  "main": "server.js",
+  "main": "build/server.js",
   "scripts": {
-    "build": "tsc --project ./",
-    "dev": "concurrently \"npm run server\"",
-    "start": "node server.js",
-    "server": "nodemon server.js"
+    "build": "tsc --project ./ ",
+    "start": "node build/server.js",
+    "server": "node build/server.js",
+    "dev": "concurrently \"nodemon -L ./server.ts\""
   },
   "keywords": [
     "NiVest",
@@ -17,8 +17,6 @@
   "license": "MIT",
   "dependencies": {
     "@sendgrid/mail": "^7.6.0",
-    "@types/cors": "^2.8.12",
-    "@types/pg": "^8.6.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
@@ -33,6 +31,8 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.12",
+    "@types/pg": "^8.6.1",
     "@types/crypto-js": "^4.0.2",
     "@types/elliptic": "^6.4.13",
     "@types/express": "^4.17.13",

@@ -3,7 +3,7 @@ import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 //custom imports
-import { dbSequelise } from "../config/db";
+import { dbSequelise } from "../database/db";
 import { ec } from "elliptic";
 
 const ecGenerate = new ec("secp256k1");
@@ -120,7 +120,6 @@ const User = dbSequelise.define(
             d: "mm",
           });
 
-          
           if (
             avatar &&
             avatar.toString() &&
@@ -134,7 +133,6 @@ const User = dbSequelise.define(
         }
       },
       beforeSave: async (user) => {
-
         // UPDATE accounts SET token = $1 WHERE email = $2
 
         user.token = await user.createToken(user["user_id"], {

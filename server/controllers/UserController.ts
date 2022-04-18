@@ -25,12 +25,16 @@ class UserController {
   register = asyncHandler(async (req: any, res: any, next: any) => {
     //check if password matches the confirmation password 2 form inputs
     if (req.body.password !== req.body.confPassword) {
-      return next(new ErrorResponse("Password provided does not match the confirmation password.", 422));
+      return next(
+        new ErrorResponse(
+          "Password provided does not match the confirmation password.",
+          422
+        )
+      );
     }
     try {
-
       // INSERT INTO accounts (name, email, password, avatar, public_key, private_key, account_type) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *
-      
+
       const createdUser = await User.create(req.body);
       res.status(201).json({
         message: "User Created",
@@ -41,7 +45,6 @@ class UserController {
       res.status(400).send(error);
     }
   });
-
 
   getUsers = asyncHandler(async (req: any, res: any, next: any) => {
     if (
@@ -54,37 +57,29 @@ class UserController {
 
       // SELECT * FROM accounts WHERE token = $1
 
-      const user = await User.findOne({ where: { token } }) || false;
-
+      const user = (await User.findOne({ where: { token } })) || false;
 
       if (user) {
-        
         // SELECT * FROM accounts
 
-        const users = await User.findAll()
+        const users = await User.findAll();
 
         res.json(users);
-
       } else {
-
         // SELECT user_id FROM accounts
-        
-        const users = await User.findAll({ attributes: ['user_id'] })
+
+        const users = await User.findAll({ attributes: ["user_id"] });
 
         res.json(users);
       }
     } else {
+      // SELECT user_id FROM accounts
 
-        // SELECT user_id FROM accounts
+      const users = await User.findAll({ attributes: ["user_id"] });
 
-        const users = await User.findAll({ attributes: ['user_id'] })
-
-        res.json(users);
+      res.json(users);
     }
   });
-
-
-
 }
 
 export default UserController;
