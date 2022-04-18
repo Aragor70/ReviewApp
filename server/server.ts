@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./config/config.env" });
+require("dotenv").config({ path: "../config/config.env" });
 
 import express, { Request, Response, Application } from "express";
 import errorHandler from "./middlewares/error";
