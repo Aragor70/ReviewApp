@@ -1,17 +1,17 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "NiVest app",
+  "description": "Review app",
   "main": "build/server.js",
   "scripts": {
-    "build": "tsc --project ./ ",
+    "build": "tsc --project ./",
     "start": "node build/server.js",
     "server": "node build/server.js",
     "dev": "concurrently \"nodemon -L ./server.ts\""
   },
   "keywords": [
-    "NiVest",
-    "blockchain"
+    "Review",
+    "e-commerce"
   ],
   "author": "mikey.prus@gmail.com",
   "license": "MIT",

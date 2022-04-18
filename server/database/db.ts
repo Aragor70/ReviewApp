@@ -1,15 +1,4 @@
-// import pg from "pg";
 import { Sequelize } from "sequelize";
-
-// const Pool = pg.Pool;
-
-// export const pool = new Pool({
-//   user: "postgres",
-//   password: process.env.POSTGRES_PASSWORD,
-//   host: "localhost",
-//   port: 5432,
-//   database: "review",
-// });
 
 const dbSequelise = new Sequelize(
   process.env.POSTGRES_DB || "",

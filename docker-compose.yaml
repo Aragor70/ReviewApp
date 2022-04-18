@@ -15,10 +15,19 @@ services:
       - /app/node_modules
     depends_on:
       - database
+      - npmServer
     ports:
       - "5000:5000"
     env_file:
       - ./config/postgres.env
     command: "npm run dev"
+  npmServer:
+    image: node:lts-alpine
+    working_dir: /app
+    entrypoint: ["npm"]
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./server:/app
 volumes:
   data:
