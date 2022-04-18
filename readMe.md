@@ -49,7 +49,7 @@ Bring up the server and database with:
 docker-compose up server
 ```
 
-install npm dependencies server side with:
+install server npm dependencies localy if you need with:
 
 ```
 docker-compose --rm run npmServer [install] or [your command]
