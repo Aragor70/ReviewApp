@@ -1,22 +1,11 @@
-import pg from "pg";
 import { Sequelize } from "sequelize";
 
-const Pool = pg.Pool;
-
-export const pool = new Pool({
-  user: "postgres",
-  password: process.env.PSQL_PASSWORD,
-  host: "localhost",
-  port: 5432,
-  database: "review",
-});
-
 const dbSequelise = new Sequelize(
-  process.env.PSQL_DATABASE || "",
-  process.env.PSQL_USERNAME || "",
-  process.env.PSQL_PASSWORD,
+  process.env.POSTGRES_DB || "",
+  process.env.POSTGRES_USER || "",
+  process.env.POSTGRES_PASSWORD,
   {
-    host: process.env.HOST,
+    host: process.env.PSQL_HOST,
     dialect: "postgres",
   }
 );
@@ -30,7 +19,7 @@ const dbSequelise = new Sequelize(
     await dbSequelise.authenticate();
     console.log("DB Connection has been established successfully.");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("Unable to connect to the database: here here !", error);
   }
 })();
 

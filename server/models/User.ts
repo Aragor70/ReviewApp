@@ -3,7 +3,7 @@ import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 //custom imports
-import { dbSequelise } from "../config/db";
+import { dbSequelise } from "../database/db";
 import { ec } from "elliptic";
 
 const ecGenerate = new ec("secp256k1");
@@ -31,7 +31,7 @@ interface User {
 }
 
 const User = dbSequelise.define(
-  "accounts",
+  "users",
   {
     user_id: {
       primaryKey: true,
@@ -95,7 +95,7 @@ const User = dbSequelise.define(
     code: { type: DataTypes.STRING(255) },
   },
   {
-    freezeTableName: true, // telling sequilize i want the table name defined above
+    // freezeTableName: true, // telling sequilize i want the table name defined above
     hooks: {
       beforeCreate: (user: any) => {
         try {
@@ -120,7 +120,6 @@ const User = dbSequelise.define(
             d: "mm",
           });
 
-          
           if (
             avatar &&
             avatar.toString() &&
@@ -134,9 +133,7 @@ const User = dbSequelise.define(
         }
       },
       beforeSave: async (user) => {
-
         // UPDATE accounts SET token = $1 WHERE email = $2
-
         user.token = await user.createToken(user["user_id"], {
           name: "Review_Secret_Key",
         });
