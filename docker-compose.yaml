@@ -5,7 +5,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
     env_file:
-      - ./config/postgres.env
+      - ./config/config.env
     ports:
       - "5432:8080"
   server:
@@ -18,7 +18,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - ./config/postgres.env
+      - ./config/config.env
     command: "npm run dev"
   npmServer:
     image: node:lts-alpine
