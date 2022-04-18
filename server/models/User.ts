@@ -17,7 +17,7 @@ interface User {
   last_name: string;
   gender_title: string;
   country: string;
-  date_of_birth: string;
+  date_of_birth: Date;
   created_at: Date;
   last_login: Date;
   avatar: string;
@@ -95,7 +95,6 @@ const User = dbSequelise.define(
     code: { type: DataTypes.STRING(255) },
   },
   {
-    // freezeTableName: true, // telling sequilize i want the table name defined above
     hooks: {
       beforeCreate: (user: any) => {
         try {
@@ -129,7 +128,7 @@ const User = dbSequelise.define(
             user.avatar = avatar;
           }
         } catch (err) {
-          console.log(err);
+          console.error(err);
         }
       },
       beforeSave: async (user) => {
@@ -161,7 +160,6 @@ User.prototype.createToken = async (
   options?: { expiresIn: "24h" | "36H" | string }
 ) => {
   const JWTSecretKey: string = process.env["jwtSecret"]!;
-  console.log(user);
   try {
     // prettier-ignore
     const token = await jwt.sign({...payload},JWTSecretKey,{...options} || {expiresIn: '10h'});
